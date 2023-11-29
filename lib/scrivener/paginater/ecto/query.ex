@@ -37,12 +37,12 @@ defimpl Scrivener.Paginater, for: Ecto.Query do
 
   defp entries(query, repo, page_number, _, page_size, caller, options) do
     offset = Keyword.get_lazy(options, :offset, fn -> page_size * (page_number - 1) end)
-    prefix = options[:prefix]
+    opts = Keyword.take(options, [:prefix, :timeout])
 
     query
     |> offset(^offset)
     |> limit(^page_size)
-    |> all(repo, caller, prefix)
+    |> all(repo, caller, opts)
   end
 
   defp total_entries(query, repo, caller, options) do
@@ -100,12 +100,12 @@ defimpl Scrivener.Paginater, for: Ecto.Query do
     (total_entries / page_size) |> Float.ceil() |> round
   end
 
-  defp all(query, repo, caller, nil) do
+  defp all(query, repo, caller, []) do
     repo.all(query, caller: caller)
   end
 
-  defp all(query, repo, caller, prefix) do
-    repo.all(query, caller: caller, prefix: prefix)
+  defp all(query, repo, caller, opts) do
+    repo.all(query, Keyword.put(opts, :caller, caller))
   end
 
   defp one(query, repo, caller, nil) do
