@@ -19,24 +19,41 @@ defimpl Scrivener.Paginater, for: Ecto.Query do
       end)
 
     total_pages = total_pages(total_entries, page_size)
-    allow_overflow_page_number = Keyword.get(options, :allow_overflow_page_number, false)
+
+    allow_overflow_page_number =
+      Keyword.get(options, :allow_overflow_page_number, false)
 
     page_number =
-      if allow_overflow_page_number, do: page_number, else: min(total_pages, page_number)
+      if allow_overflow_page_number,
+        do: page_number,
+        else: min(total_pages, page_number)
 
     %Page{
       page_size: page_size,
       page_number: page_number,
-      entries: entries(query, repo, page_number, total_pages, page_size, caller, options),
+      entries:
+        entries(
+          query,
+          repo,
+          page_number,
+          total_pages,
+          page_size,
+          caller,
+          options
+        ),
       total_entries: total_entries,
       total_pages: total_pages
     }
   end
 
-  defp entries(_, _, page_number, total_pages, _, _, _) when page_number > total_pages, do: []
+  defp entries(_, _, page_number, total_pages, _, _, _)
+       when page_number > total_pages,
+       do: []
 
   defp entries(query, repo, page_number, _, page_size, caller, options) do
-    offset = Keyword.get_lazy(options, :offset, fn -> page_size * (page_number - 1) end)
+    offset =
+      Keyword.get_lazy(options, :offset, fn -> page_size * (page_number - 1) end)
+
     opts = Keyword.take(options, [:prefix, :timeout])
 
     query
@@ -58,7 +75,8 @@ defimpl Scrivener.Paginater, for: Ecto.Query do
     total_entries || 0
   end
 
-  defp aggregate(%{distinct: %{expr: expr}} = query) when expr == true or is_list(expr) do
+  defp aggregate(%{distinct: %{expr: expr}} = query)
+       when expr == true or is_list(expr) do
     query
     |> exclude(:select)
     |> count()

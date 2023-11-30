@@ -361,7 +361,11 @@ defmodule Scrivener.Paginator.Ecto.QueryTest do
       page =
         Post
         |> Post.published()
-        |> Scrivener.paginate(%{"module" => Scrivener.Ecto.Repo, "page" => 2, "page_size" => 4})
+        |> Scrivener.paginate(%{
+          "module" => Scrivener.Ecto.Repo,
+          "page" => 2,
+          "page_size" => 4
+        })
 
       assert page.page_size == 4
       assert page.page_number == 2
@@ -431,14 +435,16 @@ defmodule Scrivener.Paginator.Ecto.QueryTest do
       create_users(6, "tenant_1")
       create_users(2, "tenant_2")
 
-      page_tenant_1 = Scrivener.Ecto.Repo.paginate(User, options: [prefix: "tenant_1"])
+      page_tenant_1 =
+        Scrivener.Ecto.Repo.paginate(User, options: [prefix: "tenant_1"])
 
       assert page_tenant_1.page_size == 5
       assert page_tenant_1.page_number == 1
       assert page_tenant_1.total_entries == 6
       assert page_tenant_1.total_pages == 2
 
-      page_tenant_2 = Scrivener.Ecto.Repo.paginate(User, options: [prefix: "tenant_2"])
+      page_tenant_2 =
+        Scrivener.Ecto.Repo.paginate(User, options: [prefix: "tenant_2"])
 
       assert page_tenant_2.page_size == 5
       assert page_tenant_2.page_number == 1
